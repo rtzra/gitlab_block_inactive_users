@@ -9,6 +9,7 @@
 # 3. Check log
 #
 # Changelog:
+# - v.0.0.2 - fix log file name (replace spaces, remove TimeZone)
 # - v.0.0.1 - first release
 
 namespace :mycompany do
@@ -43,12 +44,13 @@ namespace :mycompany do
       # Get environment flag for making real changes
       block_flag = ENV['BLOCK']
   
-      # Start time
+      # Start time, for example: "2021-05-19 19:10:01 +0300"
       time_start = Time.now
   
       # Create log dir if doesn't exist
-      Dir.mkdir("#{log_file_path}") unless Dir.exist?("#{log_file_path}")
-      log_file = File.open("#{log_file_path}/block-users-#{time_start}.log", "w")
+      log_file_name = "block-users-#{time_start}"
+      log_file_name = (log_file_name.split(' +')[0]).gsub! ' ','_' # Remove TimeZone, Replace spaces to underlines
+      log_file = File.open("#{log_file_path}/#{log_file_name}.log", "w")
       log_file.write "Task started at: #{time_start}\n"
   
       # Search administrative username for auditing purposes
