@@ -8,8 +8,8 @@
 # Remember: flag BLOCK=true for block users, else script run in 'dry-run' mode
 # 3. Check log
 #
-# Changelog:
-# - v.0.0.2 - fix log file name (replace spaces, remove TimeZone)
+# - v.0.0.3 - fix log file name (replace ':' to '-')
+# - v.0.0.2 - fix log file name (replace ' ' to '_', remove TimeZone)
 # - v.0.0.1 - first release
 
 namespace :mycompany do
@@ -49,7 +49,7 @@ namespace :mycompany do
   
       # Create log dir if doesn't exist
       log_file_name = "block-users-#{time_start}"
-      log_file_name = (log_file_name.split(' +')[0]).gsub! ' ','_' # Remove TimeZone, Replace spaces to underlines
+      log_file_name = ((log_file_name.split(' +')[0]).gsub! ' ','_').gsub! ':','-' # Remove TimeZone, Replace ' ' to '_' and ':' to '-'
       log_file = File.open("#{log_file_path}/#{log_file_name}.log", "w")
       log_file.write "Task started at: #{time_start}\n"
   
