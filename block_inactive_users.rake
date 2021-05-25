@@ -77,31 +77,32 @@ namespace :mycompany do
           users.each do |user|
               log_file.write "  User: #{user.username} / current_sign_in_at: #{user.current_sign_in_at} / last_activity_on: #{user.last_activity_on} ..."
               
-              if block_flag # Check blocking flag, if true we can delete user
-  
-                  # Check for excluded acounts and bots 
-                  if not excluded_users.include? "#{user.username}"
-                      then # User not in exclude list
-  
-                          # Search for users Projects
-                          if ProjectAuthorization.find_by(user_id: user.id) != nil
-                              then
-                                  stat_not_deleted += 1
-                                  log_file.write " [Not Deleted (have a Projects)]\n"
-                              else
-                                  
-                                  # DELETE ACTION
-                                  DeleteUserWorker.perform_async(current_user.id, user.id)
-  
-                                  stat_deleted += 1
-                                  log_file.write " [DELETED]\n"
-                          end
-                      else # User in exclude list
-                          stat_excluded += 1
-                          log_file.write " [EXCLUDED]\n"
-                  end        
+              # Check for excluded acounts and bots 
+              if not excluded_users.include? "#{user.username}"
+                then # User not in exclude list
+
+                    if block_flag # Check blocking flag, if true we can delete user
+
+                        # Search for users Projects
+                        if ProjectAuthorization.find_by(user_id: user.id) != nil
+                            then
+                                stat_not_deleted += 1
+                                log_file.write " [Not Deleted (have a Projects)]\n"
+                            else
+                                
+                                # DELETE ACTION
+                                DeleteUserWorker.perform_async(current_user.id, user.id)
+
+                                stat_deleted += 1
+                                log_file.write " [DELETED]\n"
+                        end
+                    else
+                        log_file.write " [May be Deleted]\n"
+                end        
               else
-                  log_file.write " [May be Deleted]\n"
+                # User in exclude list
+                stat_excluded += 1
+                log_file.write " [EXCLUDED]\n"
               end
           end
           log_file.write "Total for deletion #{users.count} | Deleted: #{stat_deleted} | Not deleted: #{stat_not_deleted} | Excluded: #{stat_excluded}\n"
